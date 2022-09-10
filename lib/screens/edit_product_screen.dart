@@ -13,6 +13,7 @@ class EditProductScreen extends StatefulWidget {
 }
 
 class _EditProductScreenState extends State<EditProductScreen> {
+  var _isInit = true;
   final _priceFocusNode = FocusNode();
   final _descritpionFocusNode = FocusNode();
   final _imageUrlFocusNode = FocusNode();
@@ -25,6 +26,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
     imageUrl: "",
     price: 0,
   );
+  var _initValues = {
+    "title": "",
+    "description": "",
+    "imageUrl": "",
+    "price": "",
+  };
 
   void _updateImageUrl() {
     if (!_imageUrlFocusNode.hasFocus) {
@@ -44,13 +51,41 @@ class _EditProductScreenState extends State<EditProductScreen> {
       return;
     }
     _form.currentState!.save();
-    Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+    if (_editedProduct.id != "") {
+      Provider.of<Products>(context, listen: false).updateProduct(
+        _editedProduct.id,
+        _editedProduct,
+      );
+    } else {
+      Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+    }
   }
 
   @override
   void initState() {
     _imageUrlFocusNode.addListener(_updateImageUrl);
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      final productId = ModalRoute.of(context)!.settings.arguments;
+      if (productId != null) {
+        _editedProduct = Provider.of<Products>(
+          context,
+          listen: false,
+        ).findById(productId as String);
+        _initValues = {
+          "title": _editedProduct.title,
+          "description": _editedProduct.description,
+          "price": _editedProduct.price.toString(),
+        };
+        _imageUrlController.text = _editedProduct.imageUrl;
+      }
+    }
+    _isInit = false;
+    super.didChangeDependencies();
   }
 
   @override
@@ -82,6 +117,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           child: ListView(
             children: [
               TextFormField(
+                initialValue: _initValues["title"],
                 decoration: const InputDecoration(
                   labelText: "Title",
                 ),
@@ -95,6 +131,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   description: _editedProduct.description,
                   id: _editedProduct.id,
                   imageUrl: _editedProduct.imageUrl,
+                  isFavorite: _editedProduct.isFavorite,
                 ),
                 validator: (value) {
                   if (value!.isEmpty) return "Please, provide a value.";
@@ -102,6 +139,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 },
               ),
               TextFormField(
+                initialValue: _initValues["price"],
                 decoration: const InputDecoration(
                   labelText: "Price",
                 ),
@@ -117,6 +155,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   description: _editedProduct.description,
                   id: _editedProduct.id,
                   imageUrl: _editedProduct.imageUrl,
+                  isFavorite: _editedProduct.isFavorite,
                 ),
                 validator: (value) {
                   if (value!.isEmpty) return "Please, enter a price.";
@@ -130,6 +169,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 },
               ),
               TextFormField(
+                initialValue: _initValues["description"],
                 decoration: const InputDecoration(
                   labelText: "Description",
                 ),
@@ -142,6 +182,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   description: newValue!,
                   id: _editedProduct.id,
                   imageUrl: _editedProduct.imageUrl,
+                  isFavorite: _editedProduct.isFavorite,
                 ),
                 validator: (value) {
                   if (value!.isEmpty) return "Please, enter a description.";
@@ -186,6 +227,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         description: _editedProduct.description,
                         id: _editedProduct.id,
                         imageUrl: newValue!,
+                        isFavorite: _editedProduct.isFavorite,
                       ),
                       validator: (value) {
                         if (value!.isEmpty) {
