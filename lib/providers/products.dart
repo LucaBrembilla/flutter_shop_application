@@ -52,7 +52,7 @@ class Products with ChangeNotifier {
 
   Future<void> addProduct(Product product) async {
     final Uri url = Uri.parse(
-        "https://flutter-update-23ff1-default-rtdb.europe-west1.firebasedatabase.app/products");
+        "https://flutter-update-23ff1-default-rtdb.europe-west1.firebasedatabase.app/products.json");
     try {
       final response = await http.post(
         url,
