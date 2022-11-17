@@ -99,9 +99,26 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
+      final Uri url = Uri.parse(
+          "https://flutter-update-23ff1-default-rtdb.europe-west1.firebasedatabase.app/products.json");
+      try {
+        await http.patch(
+          url,
+          body: json.encode({
+            'title': newProduct.title,
+            'description': newProduct.description,
+            'imageUrl': newProduct.imageUrl,
+            'price': newProduct.price,
+            //isFavorite will be kept. Firebase merge the fields
+          }),
+        );
+      } catch (error) {
+        print(error);
+        throw error;
+      }
       _items[prodIndex] = newProduct;
       notifyListeners();
     } else {
